@@ -4,7 +4,7 @@ import com.pos.vehicle.dto.Vehicle;
 import com.pos.vehicle.service.VehicleService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Collection;
 
 @RestController
 public class VehicleResource {
@@ -21,7 +21,7 @@ public class VehicleResource {
     }
 
     @GetMapping("/vehicles")
-    public List<Vehicle> retrieveAll() {
+    public Collection<Vehicle> retrieveAll() {
         return service.retrieveAll();
     }
 

@@ -1,50 +1,42 @@
 package com.pos.vehicle.service;
 
+import com.pos.vehicle.datastore.embedded.DataStore;
 import com.pos.vehicle.dto.Vehicle;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collection;
 
 @Service
 public class VehicleService {
 
-    private final List<Vehicle> vehicles = new ArrayList(Arrays.asList(
-            new Vehicle(1L, "152-T-1234", "Opel", "Astra Hatch", "Red"),
-            new Vehicle(2L, "152-T-1235", "Volkswagon", "Golf Hatch", "Black")
-    ));
+    private final DataStore<Vehicle> dataStore;
 
-    private final AtomicLong idGenerator = new AtomicLong(3L);
-
-    public Vehicle create(final Vehicle vehicle) {
-        vehicle.setId(idGenerator.getAndIncrement());
-        vehicles.add(vehicle);
-        return vehicle;
+    // Could have omitted the Qualifier annotation, and placed the Primary annotation on the MapDataStore component
+    // We can even use both annotations if desired
+    // @Primary to define the default, and @Qualifier when we need an override
+    public VehicleService(@Qualifier("mapDataStore") DataStore<Vehicle> dataStore) {
+        this.dataStore = dataStore;
     }
 
-    public List<Vehicle> retrieveAll() {
-        return vehicles;
+    public Vehicle create(final Vehicle vehicle) {
+        return dataStore.create(vehicle);
+    }
+
+    public Collection<Vehicle> retrieveAll() {
+        return dataStore.retrieveAll();
     }
 
     public Vehicle retrieve(final Long id) {
-        return vehicles.stream()
-                .filter(vehicle -> vehicle.getId().equals(id))
-                .findAny()
-                .orElseThrow(() -> new RuntimeException("Vehicle not found."));
+        return dataStore.retrieve(id);
     }
 
     public Vehicle update(final Long id, final Vehicle vehicle) {
-        Vehicle foundVehicle = retrieve(id);
-        foundVehicle.setReg(vehicle.getReg());
-        foundVehicle.setColor(vehicle.getColor());
-        return foundVehicle;
+        return dataStore.update(id, vehicle);
     }
 
     public void delete(final Long id) {
-        vehicles.removeIf(vehicle -> vehicle.getId().equals(id));
+        dataStore.delete(id);
     }
-
 
 }
